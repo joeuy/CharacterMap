@@ -4,7 +4,7 @@
 var fileButton, fontFamily;
 var pageSelected, font, fontScale, fontSize, fontBaseline, glyphScale, glyphSize, glyphBaseline;
 
-var cellCount = 200,
+var cellCount = 1,
     cellWidth = 60,
     cellHeight = 70,
     cellMarginTop = 20,
@@ -12,23 +12,16 @@ var cellCount = 200,
     cellMarginLeftRight = 1,
     glyphMargin = 5;
 
-function cellSelect(event) {
-    if (!font) return;
-    var firstGlyphIndex = pageSelected * cellCount,
-        cellIndex = +event.target.id.substr(1),
-        glyphIndex = firstGlyphIndex + cellIndex;
-    if (glyphIndex < font.numGlyphs) {
-        displayGlyph(glyphIndex);
-        displayGlyphData(glyphIndex);
-    }
-}
 
-$(document).ready(function() {
+
+
+
+$(document).ready(function () {
     fontFamily = document.getElementById('font-family');
     fileButton = document.getElementById('file');
     fileButton.addEventListener('change', onReadFile, false);
     var fontFileName = 'fonts/arialbd.ttf';
-    opentype.load(fontFileName, function(err, font) {
+    opentype.load(fontFileName, function (err, font) {
         var amount, glyph, ctx, x, y, fontSize;
         if (err) {
             showErrorMessage(err.toString());
@@ -36,37 +29,15 @@ $(document).ready(function() {
         }
         onFontLoaded(font);
     });
-    prepareGlyphList();
 
-    $(".nicescroll-left").niceScroll({
-        cursorcolor: "rgba(255,255,255,0.2)",
-        cursorborderradius: "5px",
-        cursorborder: "none",
-        cursorwidth: "7"
+    $('#glyph-grid').on('click', 'div', function (event) {
+        if (!font) return;
+        var glyphIndex = + event.currentTarget.id.substr(1);
+        if (glyphIndex < font.numGlyphs) {
+            displayGlyph(glyphIndex);
+            displayGlyphData(glyphIndex);
+        }
     });
-
-    $(".nicescroll-center").niceScroll({
-        cursorcolor: "rgba(255,255,255,0.4)",
-        cursorborderradius: 0,
-        cursorborder: "none",
-        cursorwidth: "7"
-    });
-
-    $(".nicescroll-right").niceScroll({
-        cursorcolor: "#AAA",
-        cursorborderradius: 0,
-        cursorborder: "none",
-        cursorwidth: "7"
-    });
-    // Span
-    // var span = document.getElementsByClassName('upload-path');
-    // Button
-    // var uploader = document.getElementById('upload');
-    // Detect changes
-    // uploader.onchange = function() {
-    //     // Echo filename in span
-    //     span[0].innerHTML = this.files[0].name;
-    // };
 
 });
 
@@ -114,7 +85,7 @@ function drawPathWithArrows(ctx, path) {
         ctx.fillStyle = path.stroke;
         ctx.stroke();
     }
-    arrows.forEach(function(arrow) {
+    arrows.forEach(function (arrow) {
         drawArrow.apply(null, arrow);
     });
 }
@@ -139,34 +110,6 @@ function drawArrow(ctx, x1, y1, x2, y2) {
     ctx.lineTo(x2, y2);
     ctx.closePath();
     ctx.fill();
-}
-
-function renderGlyphItem(canvas, glyphIndex) {
-    var cellMarkSize = 6;
-    var ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, cellWidth, cellHeight);
-    if (glyphIndex >= font.numGlyphs) return;
-
-    ctx.fillStyle = '#AAA';
-    ctx.font = '9px "Open Sans"';
-    ctx.fillText(glyphIndex, 2, cellHeight - 2);
-    var glyph = font.glyphs[glyphIndex],
-        glyphWidth = glyph.advanceWidth * fontScale,
-        xmin = (cellWidth - glyphWidth) / 2,
-        xmax = (cellWidth + glyphWidth) / 2,
-        x0 = xmin;
-
-    // ctx.fillStyle = '#e67e22';
-    // ctx.fillRect(xmin - cellMarkSize + 2, fontBaseline, cellMarkSize, 2);
-    // ctx.fillRect(xmin, fontBaseline, 2, cellMarkSize);
-    // ctx.fillRect(xmax, fontBaseline, cellMarkSize, 2);
-    // ctx.fillRect(xmax, fontBaseline, 2, cellMarkSize);
-
-    ctx.fillStyle = '#FFFFFF';
-
-    var path = glyph.getPath(x0, fontBaseline, fontSize);
-    path.fill = "#333";
-    path.draw(ctx);
 }
 
 var resolveGlyphDpi;
@@ -213,7 +156,7 @@ function onReadFile(e) {
     var file = e.target.files[0];
     var reader = new FileReader();
 
-    reader.onload = function(e) {
+    reader.onload = function (e) {
         try {
             font = opentype.parse(e.target.result);
             // fontFamily.innerHTML = font.familyName || this.files[0].name.replace(/\.[^/.]+$/, "");
@@ -224,16 +167,24 @@ function onReadFile(e) {
             throw (err);
         }
     };
-    reader.onerror = function(err) {
+    reader.onerror = function (err) {
         showErrorMessage(err.toString());
     };
 
     reader.readAsArrayBuffer(file);
+
+
+    var reader2 = new FileReader();
+    reader2.onload = function (e) {
+        var style = '@font-face {font-family:"loaded-font";src:url(' + e.target.result + ');font-style:normal;}';
+        var sloader = document.getElementById('fontloader');
+        sloader.innerHTML = style;
+    }
+    reader2.readAsDataURL(file);
 }
 
 function displayGlyphData(glyphIndex) {
     var container = document.getElementById('glyph-data');
-    var holdtext = document.getElementById('copy-char');
 
     if (glyphIndex < 0) {
         container.innerHTML = '';
@@ -245,7 +196,6 @@ function displayGlyphData(glyphIndex) {
 
     if (glyph.unicodes.length > 0) {
         html += '<div><dt>unicode</dt><dd>' + glyph.unicodes.map(formatUnicode).join(', ') + '</dd></div>';
-        holdtext.value = String.fromCharCode(parseInt(glyph.unicodes.map(formatUnicode)[0], 16));
     }
 
     html += '<div><dt>index</dt><dd>' + glyph.index + '</dd></div>';
@@ -378,27 +328,30 @@ function onFontLoaded(font) {
     var pagination = document.getElementById("pagination");
     pagination.innerHTML = '';
     var fragment = document.createDocumentFragment();
-    var numPages = Math.ceil(font.numGlyphs / cellCount);
-    for (var i = 0; i < numPages; i++) {
-        var link = document.createElement('div');
-        var lastIndex = Math.min(font.numGlyphs - 1, (i + 1) * cellCount - 1);
-        link.textContent = i * cellCount + ' → ' + lastIndex;
-        link.id = 'p' + i;
-        link.className = 'page';
-        link.addEventListener('click', pageSelect, false);
-        fragment.appendChild(link);
-        // A white space allows to break very long lines into multiple lines.
-        // This is needed for fonts with thousands of glyphs.
-        fragment.appendChild(document.createTextNode(' '));
+    cellCount = font.numGlyphs + 1;
+
+
+    //prepare grid
+    var marker = document.getElementById('glyph-grid');
+    var virtualDOM = '';
+    for (var i = 0; i < font.numGlyphs; i++) {
+        var glyph = font.glyphs[i];
+
+        virtualDOM += '<div id="g' + i + '">'
+            + '<i>' + String.fromCharCode(parseInt(glyph.unicodes.map(formatUnicode)[0], 16)) + '</i>'
+            + '<span>' + glyph.name + '</span>'
+            + '</div>';
     }
-    pagination.appendChild(fragment);
+    marker.innerHTML = virtualDOM;
 
     displayFontBasic();
     initGlyphDisplay();
-    displayGlyphPage(0);
-    displayGlyph(-1);
-    displayGlyphData(-1);
+
+    //displayGlyph(-1);
+    //displayGlyphData(-1);
 }
+
+
 
 function pathCommandToString(cmd) {
     var str = '<strong>' + cmd.type + '</strong> ' +
@@ -409,7 +362,7 @@ function pathCommandToString(cmd) {
 }
 
 function contourToString(contour) {
-    return '<pre class="contour">' + contour.map(function(point) {
+    return '<pre class="contour">' + contour.map(function (point) {
         return '<span class="' + (point.onCurve ? 'on' : 'off') + 'curve">x=' + point.x + ' y=' + point.y + '</span>';
     }).join('\n') + '</pre>';
 }
@@ -423,36 +376,6 @@ function formatUnicode(unicode) {
     }
 }
 
-function pageSelect(event) {
-    var selected = document.getElementsByClassName('page-selected');
-    if(selected.length > 0) {
-        selected[0].className = 'page';
-    }
-
-    displayGlyphPage(+event.target.id.substr(1));
-}
-
-function displayGlyphPage(pageNum) {
-    pageSelected = pageNum;
-    document.getElementById('p' + pageNum).className = 'page-selected page';
-    var firstGlyph = pageNum * cellCount;
-    for (var i = 0; i < cellCount; i++) {
-        renderGlyphItem(document.getElementById('g' + i), firstGlyph + i);
-    }
-}
-
-function prepareGlyphList() {
-    var marker = document.getElementById('glyph-list-end'),
-        parent = marker.parentElement;
-    for (var i = 0; i < cellCount; i++) {
-        var canvas = document.createElement('canvas');
-        hidpi(canvas, cellWidth, cellHeight);
-        canvas.className = 'item';
-        canvas.id = 'g' + i;
-        canvas.addEventListener('click', cellSelect, false);
-        parent.insertBefore(canvas, marker);
-    }
-}
 
 function hidpi(canvas, height, width) {
     canvas.width = height * window.devicePixelRatio;

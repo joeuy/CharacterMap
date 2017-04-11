@@ -1,4 +1,5 @@
-html, body {
+html,
+body {
     background: #222;
     padding: 0;
     margin: 0;
@@ -11,7 +12,9 @@ html {
     box-sizing: border-box;
 }
 
-*, *:before, *:after {
+*,
+*:before,
+*:after {
     box-sizing: inherit;
 }
 
@@ -92,7 +95,8 @@ html {
     font-family: "Open Sans";
 }
 
-#pagination, .pagination {
+#pagination,
+.pagination {
     text-align: left;
     font-size: 12px;
     height: 100%;
@@ -104,11 +108,13 @@ html {
     background: #EEE;
 }
 
-#glyph-data dl, #font-data dl {
+#glyph-data dl,
+#font-data dl {
     margin: 0;
 }
 
-#glyph-data dt, #font-data dt {
+#glyph-data dt,
+#font-data dt {
     display: inline-block;
     font: bold 12px/1.4 "Open Sans";
     color: #788b94;
@@ -117,7 +123,8 @@ html {
     width: 90px;
 }
 
-#glyph-data dd, #font-data dd {
+#glyph-data dd,
+#font-data dd {
     display: inline-block;
     font: 600 12px/1.4 "Open Sans";
     color: #c3d7ef;
@@ -125,4 +132,34 @@ html {
     margin-bottom: 10px;
     margin-left: 0;
     text-align: left;
+}
+
+.glyph-grid {
+    overflow: auto;
+    height: 100%;
+    overflow-x: hidden;
+}
+
+.glyph-grid div {
+    float: left;
+    height: 70px;
+    width: 70px;
+    border: 1px solid #eee;
+    cursor: pointer;
+    color: black;
+    overflow: hidden;
+    text-align: center;
+}
+
+.glyph-grid span {
+    font-size: 10px;
+}
+
+.glyph-grid i {
+    font-size: 22px;
+    height: 22px;
+    display: block;
+    font-family: 'loaded-font';
+    font-style: normal;
+    margin: 20px 5px 2px;
 }
