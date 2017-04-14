@@ -12,6 +12,7 @@ var cellCount = 1,
     cellMarginLeftRight = 1,
     glyphMargin = 5;
 
+
 $(document).ready(function () {
     fontFamily = document.getElementById('font-family');
     fileButton = document.getElementById('file');
@@ -326,7 +327,8 @@ function onFontLoaded(font) {
 
         virtualDOM += '<div id="g' + i + '">'
             + '<i>' + String.fromCharCode(parseInt(glyph.unicodes.map(formatUnicode)[0], 16)) + '</i>'
-            + '<span>' + glyph.name + '</span>'
+            + '<span>' + (glyph.name || '') + '</span>'
+            + '<span class="unicode">' + glyph.unicodes.map(formatUnicode)[0] + '</span>'
             + '</div>';
     }
     marker.innerHTML = virtualDOM;

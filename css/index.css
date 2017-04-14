@@ -149,10 +149,17 @@ html {
     color: black;
     overflow: hidden;
     text-align: center;
+    position: relative;
 }
 
 .glyph-grid span {
     font-size: 10px;
+}
+
+.glyph-grid .unicode{
+    position: absolute;
+    top: 2px;
+    right: 2px;
 }
 
 .glyph-grid i {
