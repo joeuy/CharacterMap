@@ -13,22 +13,10 @@ var cellCount = 1,
     glyphMargin = 5;
 
 
-
-
-
 $(document).ready(function () {
     fontFamily = document.getElementById('font-family');
     fileButton = document.getElementById('file');
     fileButton.addEventListener('change', onReadFile, false);
-    var fontFileName = 'fonts/arialbd.ttf';
-    opentype.load(fontFileName, function (err, font) {
-        var amount, glyph, ctx, x, y, fontSize;
-        if (err) {
-            showErrorMessage(err.toString());
-            return;
-        }
-        onFontLoaded(font);
-    });
 
     $('#glyph-grid').on('click', 'div', function (event) {
         if (!font) return;
@@ -339,7 +327,8 @@ function onFontLoaded(font) {
 
         virtualDOM += '<div id="g' + i + '">'
             + '<i>' + String.fromCharCode(parseInt(glyph.unicodes.map(formatUnicode)[0], 16)) + '</i>'
-            + '<span>' + glyph.name + '</span>'
+            + '<span>' + (glyph.name || '') + '</span>'
+            + '<span class="unicode">' + glyph.unicodes.map(formatUnicode)[0] + '</span>'
             + '</div>';
     }
     marker.innerHTML = virtualDOM;
